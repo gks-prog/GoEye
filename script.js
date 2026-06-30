@@ -1,104 +1,498 @@
-document.addEventListener("DOMContentLoaded", () => {
-    
-    // --- Audio System (Web Audio API Synthesizer) ---
-    // Generates high-end UI sounds without needing MP3 files
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    function playHoverSound() {
-        if (audioCtx.state === 'suspended') return;
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-        
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    }
+document.addEventListener("DOMContentLoaded",()=>{
 
-    function playClickSound() {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
-        
-        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-        
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    }
 
-    // --- Preloader & Initialization ---
-    const preloader = document.getElementById('preloader');
-    const enterBtn = document.getElementById('enter-btn');
+/* ==========================
+   AUDIO ENGINE
+========================== */
 
-    enterBtn.addEventListener('click', () => {
-        // Resume Audio context on user interaction (Browser security requirement)
-        if(audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        playClickSound();
-        preloader.style.opacity = '0';
-        setTimeout(() => {
-            preloader.style.visibility = 'hidden';
-            triggerHeroAnimation();
-        }, 1000);
-    });
 
-    // --- SFX Triggers ---
-    const sfxTriggers = document.querySelectorAll('.sfx-trigger, .glass-card, a');
-    sfxTriggers.forEach(el => {
-        el.addEventListener('mouseenter', playHoverSound);
-        if(el.tagName === 'A') {
-            el.addEventListener('click', playClickSound);
-        }
-    });
+const audioCtx =
+new (window.AudioContext ||
+window.webkitAudioContext)();
 
-    // --- Scroll Reveal Animations ---
-    const revealElements = document.querySelectorAll('.reveal');
 
-    const revealCallback = (entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-                // Optional: play a very subtle sound when sections reveal
-                // playHoverSound(); 
-                observer.unobserve(entry.target);
-            }
-        });
-    };
 
-    const revealOptions = {
-        threshold: 0.15,
-        rootMargin: "0px 0px -50px 0px"
-    };
+function sound(type){
 
-    const revealObserver = new IntersectionObserver(revealCallback, revealOptions);
 
-    revealElements.forEach(el => {
-        revealObserver.observe(el);
-    });
+if(audioCtx.state==="suspended")
+return;
 
-    function triggerHeroAnimation() {
-        const heroElements = document.querySelectorAll('.hero .reveal');
-        heroElements.forEach((el, index) => {
-            setTimeout(() => {
-                el.classList.add('active');
-            }, index * 200);
-        });
-    }
+
+
+const osc =
+audioCtx.createOscillator();
+
+
+const gain =
+audioCtx.createGain();
+
+
+
+if(type==="hover"){
+
+
+osc.type="sine";
+
+osc.frequency.setValueAtTime(
+220,
+audioCtx.currentTime
+);
+
+
+osc.frequency.exponentialRampToValueAtTime(
+80,
+audioCtx.currentTime+.12
+);
+
+
+gain.gain.setValueAtTime(
+0.08,
+audioCtx.currentTime
+);
+
+
+}
+
+
+
+else{
+
+
+osc.type="triangle";
+
+
+osc.frequency.setValueAtTime(
+700,
+audioCtx.currentTime
+);
+
+
+osc.frequency.exponentialRampToValueAtTime(
+180,
+audioCtx.currentTime+.15
+);
+
+
+gain.gain.setValueAtTime(
+0.15,
+audioCtx.currentTime
+);
+
+
+}
+
+
+
+gain.gain.exponentialRampToValueAtTime(
+
+0.01,
+
+audioCtx.currentTime+.15
+
+);
+
+
+
+osc.connect(gain);
+
+gain.connect(audioCtx.destination);
+
+
+
+osc.start();
+
+osc.stop(
+audioCtx.currentTime+.15
+);
+
+
+}
+
+
+
+
+
+/* ==========================
+ PRELOADER
+========================== */
+
+
+const loader =
+document.getElementById(
+"preloader"
+);
+
+
+const enter =
+document.getElementById(
+"enter-btn"
+);
+
+
+
+enter.addEventListener(
+"click",
+()=>{
+
+
+audioCtx.resume();
+
+
+sound("click");
+
+
+
+loader.style.opacity="0";
+
+
+
+setTimeout(()=>{
+
+
+loader.style.display="none";
+
+
+document
+.querySelector(".hero-content")
+.classList.add("active");
+
+
+
+},1000);
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+/* ==========================
+ HOVER EFFECTS
+========================== */
+
+
+
+const hoverElements =
+document.querySelectorAll(
+".glass-card,a,#enter-btn"
+);
+
+
+
+hoverElements.forEach(el=>{
+
+
+el.addEventListener(
+"mouseenter",
+()=>sound("hover")
+);
+
+
+});
+
+
+
+
+
+
+
+/* ==========================
+ SCROLL REVEAL
+========================== */
+
+
+const reveals =
+document.querySelectorAll(
+".reveal"
+);
+
+
+
+const observer =
+new IntersectionObserver(
+
+(entries)=>{
+
+
+entries.forEach(entry=>{
+
+
+if(entry.isIntersecting){
+
+
+entry.target
+.classList.add("active");
+
+
+
+observer.unobserve(
+entry.target
+);
+
+
+
+}
+
+
+
+});
+
+
+},
+
+{
+
+threshold:.15
+
+}
+
+
+
+);
+
+
+
+reveals.forEach(el=>{
+
+
+observer.observe(el);
+
+
+});
+
+
+
+
+
+
+
+/* ==========================
+ SMOOTH NAVIGATION
+========================== */
+
+
+document
+.querySelectorAll(
+"nav a"
+)
+
+.forEach(link=>{
+
+
+link.addEventListener(
+"click",
+e=>{
+
+
+e.preventDefault();
+
+
+
+const target =
+document.querySelector(
+link.getAttribute("href")
+);
+
+
+
+target.scrollIntoView({
+
+behavior:"smooth"
+
+});
+
+
+
+}
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+/* ==========================
+ PARALLAX HERO
+========================== */
+
+
+const hero =
+document.querySelector(".hero");
+
+
+
+window.addEventListener(
+"scroll",
+()=>{
+
+
+let offset =
+window.scrollY;
+
+
+
+hero.style.backgroundPosition =
+
+`center ${offset*.25}px`;
+
+
+
+});
+
+
+
+
+
+
+
+/* ==========================
+ CARD TILT EFFECT
+========================== */
+
+
+
+const cards =
+document.querySelectorAll(
+".glass-card"
+);
+
+
+
+cards.forEach(card=>{
+
+
+card.addEventListener(
+"mousemove",
+e=>{
+
+
+const rect =
+card.getBoundingClientRect();
+
+
+
+const x =
+e.clientX -
+rect.left;
+
+
+
+const y =
+e.clientY -
+rect.top;
+
+
+
+const rotateX =
+(y-rect.height/2)/25;
+
+
+
+const rotateY =
+(rect.width/2-x)/25;
+
+
+
+card.style.transform =
+
+`
+
+perspective(800px)
+
+rotateX(${rotateX}deg)
+
+rotateY(${rotateY}deg)
+
+translateY(-8px)
+
+`;
+
+
+
+}
+
+);
+
+
+
+card.addEventListener(
+"mouseleave",
+()=>{
+
+
+card.style.transform="";
+
+
+}
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+/* ==========================
+ GOLD CURSOR TRAIL
+========================== */
+
+
+const glow =
+document.createElement(
+"div"
+);
+
+
+
+glow.className=
+"cursor-glow";
+
+
+document.body.appendChild(
+glow
+);
+
+
+
+window.addEventListener(
+"mousemove",
+e=>{
+
+
+glow.style.left =
+e.clientX+"px";
+
+
+glow.style.top =
+e.clientY+"px";
+
+
+
+});
+
+
+
+
+
+
 });
